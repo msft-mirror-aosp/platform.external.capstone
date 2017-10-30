@@ -38,7 +38,8 @@ cc_defaults {
     ],
     cflags: [
         "-Wall",
-        "-Wunused-parameter",
+        "-Werror",
+        "-Wno-error=unused-parameter",
         "-DCAPSTONE_USE_SYS_DYN_MEM",
     ],
     export_include_dirs: [".", "include"],
