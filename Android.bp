@@ -39,7 +39,8 @@ cc_defaults {
     cflags: [
         "-Wall",
         "-Werror",
-        "-Wno-error=unused-parameter",
+        "-Wno-unused-parameter",
+        "-Wno-missing-field-initializers",
         "-DCAPSTONE_USE_SYS_DYN_MEM",
     ],
     export_include_dirs: [".", "include"],
