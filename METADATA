@@ -9,11 +9,11 @@ third_party {
     type: GIT
     value: "https://github.com/aquynh/capstone"
   }
-  version: "2bc4e7cae793d4ef186c0cbd456dfd3e30c3b098"
+  version: "8984920722733400e93f695a0c37a80158341103"
   license_type: NOTICE
   last_upgrade_date {
     year: 2020
-    month: 11
-    day: 23
+    month: 12
+    day: 8
   }
 }
