@@ -17,7 +17,4 @@ third_party {
     month: 12
     day: 8
   }
-  security {
-      tag: "NVD-CPE2.3:cpe:/a:capstone-engine:capstone"
-  }
 }
