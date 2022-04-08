@@ -12,7 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 /* Capstone Disassembly Engine */
-/* By Nguyen Anh Quynh <aquynh@gmail.com>, 2013-2015 */
+/* By Nguyen Anh Quynh <aquynh@gmail.com>, 2013-2014 */
 
 #ifdef CAPSTONE_HAS_POWERPC
 
@@ -30,32 +30,16 @@
 #include "PPCMapping.h"
 
 #ifndef CAPSTONE_DIET
-static const char *getRegisterName(unsigned RegNo);
+static char *getRegisterName(unsigned RegNo);
 #endif
 
 static void printOperand(MCInst *MI, unsigned OpNo, SStream *O);
-static void printInstruction(MCInst *MI, SStream *O, const MCRegisterInfo *MRI);
+static void printInstruction(MCInst *MI, SStream *O, MCRegisterInfo *MRI);
 static void printAbsBranchOperand(MCInst *MI, unsigned OpNo, SStream *O);
 static char *printAliasInstr(MCInst *MI, SStream *OS, void *info);
 static char *printAliasInstrEx(MCInst *MI, SStream *OS, void *info);
 static void printCustomAliasOperand(MCInst *MI, unsigned OpIdx,
 		unsigned PrintMethodIdx, SStream *OS);
-
-#if 0
-static void printRegName(SStream *OS, unsigned RegNo)
-{
-	char *RegName = getRegisterName(RegNo);
-
-	if (RegName[0] == 'q' /* QPX */) {
-		// The system toolchain on the BG/Q does not understand QPX register names
-		// in .cfi_* directives, so print the name of the floating-point
-		// subregister instead.
-		RegName[0] = 'f';
-	}
-
-	SStream_concat0(OS, RegName);
-}
-#endif
 
 static void set_mem_access(MCInst *MI, bool status)
 {
@@ -404,7 +388,17 @@ static void printS5ImmOperand(MCInst *MI, unsigned OpNo, SStream *O)
 	int Value = (int)MCOperand_getImm(MCInst_getOperand(MI, OpNo));
 	Value = SignExtend32(Value, 5);
 
-	printInt32(O, Value);
+	if (Value >= 0) {
+		if (Value > HEX_THRESHOLD)
+			SStream_concat(O, "0x%x", Value);
+		else
+			SStream_concat(O, "%u", Value);
+	} else {
+		if (Value < -HEX_THRESHOLD)
+			SStream_concat(O, "-0x%x", -Value);
+		else
+			SStream_concat(O, "-%u", -Value);
+	}
 
 	if (MI->csh->detail) {
 		MI->flat_insn->detail->ppc.operands[MI->flat_insn->detail->ppc.op_count].type = PPC_OP_IMM;
@@ -417,7 +411,10 @@ static void printU5ImmOperand(MCInst *MI, unsigned OpNo, SStream *O)
 {
 	unsigned int Value = (unsigned int)MCOperand_getImm(MCInst_getOperand(MI, OpNo));
 	//assert(Value <= 31 && "Invalid u5imm argument!");
-	printUInt32(O, Value);
+	if (Value > HEX_THRESHOLD)
+		SStream_concat(O, "0x%x", Value);
+	else
+		SStream_concat(O, "%u", Value);
 
 	if (MI->csh->detail) {
 		MI->flat_insn->detail->ppc.operands[MI->flat_insn->detail->ppc.op_count].type = PPC_OP_IMM;
@@ -430,21 +427,6 @@ static void printU6ImmOperand(MCInst *MI, unsigned OpNo, SStream *O)
 {
 	unsigned int Value = (unsigned int)MCOperand_getImm(MCInst_getOperand(MI, OpNo));
 	//assert(Value <= 63 && "Invalid u6imm argument!");
-	printUInt32(O, Value);
-
-	if (MI->csh->detail) {
-		MI->flat_insn->detail->ppc.operands[MI->flat_insn->detail->ppc.op_count].type = PPC_OP_IMM;
-		MI->flat_insn->detail->ppc.operands[MI->flat_insn->detail->ppc.op_count].imm = Value;
-		MI->flat_insn->detail->ppc.op_count++;
-	}
-}
-
-static void printU12ImmOperand(MCInst *MI, unsigned OpNo, SStream *O)
-{
-	unsigned short Value = (unsigned short)MCOperand_getImm(MCInst_getOperand(MI, OpNo));
-
-	// assert(Value <= 4095 && "Invalid u12imm argument!");
-
 	if (Value > HEX_THRESHOLD)
 		SStream_concat(O, "0x%x", Value);
 	else
@@ -460,11 +442,18 @@ static void printU12ImmOperand(MCInst *MI, unsigned OpNo, SStream *O)
 static void printS16ImmOperand(MCInst *MI, unsigned OpNo, SStream *O)
 {
 	if (MCOperand_isImm(MCInst_getOperand(MI, OpNo))) {
-		unsigned short Imm = (unsigned short)MCOperand_getImm(MCInst_getOperand(MI, OpNo));
-        if (Imm > HEX_THRESHOLD)
-            SStream_concat(O, "0x%x", Imm);
-        else
-            SStream_concat(O, "%u", Imm);
+		short Imm = (short)MCOperand_getImm(MCInst_getOperand(MI, OpNo));
+		if (Imm >= 0) {
+			if (Imm > HEX_THRESHOLD)
+				SStream_concat(O, "0x%x", Imm);
+			else
+				SStream_concat(O, "%u", Imm);
+		} else {
+			if (Imm < -HEX_THRESHOLD)
+				SStream_concat(O, "-0x%x", -Imm);
+			else
+				SStream_concat(O, "-%u", -Imm);
+		}
 
 		if (MI->csh->detail) {
 			MI->flat_insn->detail->ppc.operands[MI->flat_insn->detail->ppc.op_count].type = PPC_OP_IMM;
@@ -537,20 +526,20 @@ static void printBranchOperand(MCInst *MI, unsigned OpNo, SStream *O)
 
 static void printAbsBranchOperand(MCInst *MI, unsigned OpNo, SStream *O)
 {
-	int64_t imm;
+	int imm;
 
 	if (!MCOperand_isImm(MCInst_getOperand(MI, OpNo))) {
 		printOperand(MI, OpNo, O);
 		return;
 	}
 
-	imm = MCOperand_getImm(MCInst_getOperand(MI, OpNo)) * 4;
+	imm = ((int)MCOperand_getImm(MCInst_getOperand(MI, OpNo)) << 2);
 
 	if (!PPC_abs_branch(MI->csh, MCInst_getOpcode(MI))) {
-		imm = MI->address + imm;
+		imm = (int)MI->address + imm;
 	}
 
-	SStream_concat(O, "0x%"PRIx64, imm);
+	SStream_concat(O, "0x%x", imm);
 
 	if (MI->csh->detail) {
 		MI->flat_insn->detail->ppc.operands[MI->flat_insn->detail->ppc.op_count].type = PPC_OP_IMM;
@@ -635,12 +624,11 @@ static void printTLSCall(MCInst *MI, unsigned OpNo, SStream *O)
 #ifndef CAPSTONE_DIET
 /// stripRegisterPrefix - This method strips the character prefix from a
 /// register name so that only the number is left.  Used by for linux asm.
-static const char *stripRegisterPrefix(const char *RegName)
+static char *stripRegisterPrefix(char *RegName)
 {
 	switch (RegName[0]) {
 		case 'r':
 		case 'f':
-		case 'q': // for QPX
 		case 'v':
 			if (RegName[1] == 's')
 				return RegName + 2;
@@ -660,7 +648,7 @@ static void printOperand(MCInst *MI, unsigned OpNo, SStream *O)
 	if (MCOperand_isReg(Op)) {
 		unsigned reg = MCOperand_getReg(Op);
 #ifndef CAPSTONE_DIET
-		const char *RegName = getRegisterName(reg);
+		char *RegName = getRegisterName(reg);
 #endif
 		// map to public register
 		reg = PPC_map_register(reg);
@@ -687,11 +675,21 @@ static void printOperand(MCInst *MI, unsigned OpNo, SStream *O)
 
 	if (MCOperand_isImm(Op)) {
 		int32_t imm = (int32_t)MCOperand_getImm(Op);
-		printInt32(O, imm);
+		if (imm >= 0) {
+			if (imm > HEX_THRESHOLD)
+				SStream_concat(O, "0x%x", imm);
+			else
+				SStream_concat(O, "%u", imm);
+		} else {
+			if (imm < -HEX_THRESHOLD)
+				SStream_concat(O, "-0x%x", -imm);
+			else
+				SStream_concat(O, "-%u", -imm);
+		}
 
 		if (MI->csh->detail) {
 			if (MI->csh->doing_mem) {
-				MI->flat_insn->detail->ppc.operands[MI->flat_insn->detail->ppc.op_count].mem.disp = (int32_t)imm;
+				MI->flat_insn->detail->ppc.operands[MI->flat_insn->detail->ppc.op_count].mem.disp = imm;
 			} else {
 				MI->flat_insn->detail->ppc.operands[MI->flat_insn->detail->ppc.op_count].type = PPC_OP_IMM;
 				MI->flat_insn->detail->ppc.operands[MI->flat_insn->detail->ppc.op_count].imm = imm;

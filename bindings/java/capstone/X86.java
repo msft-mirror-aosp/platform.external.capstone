@@ -25,28 +25,16 @@ public class X86 {
       return Arrays.asList("segment", "base", "index", "scale", "disp");
     }
   }
-  
-  public static class Encoding extends Structure {
-    public byte modrmOffset;
-    public byte dispOffset;
-    public byte dispSize;
-    public byte immOffset;
-    public byte immSize;
-
-    @Override
-    public List getFieldOrder() {
-      return Arrays.asList("modrmOffset", "dispOffset", "dispSize", "immOffset", "immSize");
-    }
-  }
 
   public static class OpValue extends Union {
     public int reg;
     public long imm;
+    public double fp;
     public MemType mem;
 
     @Override
     public List getFieldOrder() {
-      return Arrays.asList("reg", "imm", "mem");
+      return Arrays.asList("reg", "imm", "fp", "mem");
     }
   }
 
@@ -54,7 +42,6 @@ public class X86 {
     public int type;
     public OpValue value;
     public byte size;
-    public byte access;
     public int avx_bcast;
     public boolean avx_zero_opmask;
 
@@ -62,6 +49,8 @@ public class X86 {
       super.read();
       if (type == X86_OP_MEM)
         value.setType(MemType.class);
+      if (type == X86_OP_FP)
+        value.setType(Double.TYPE);
       if (type == X86_OP_IMM)
         value.setType(Long.TYPE);
       if (type == X86_OP_REG)
@@ -73,7 +62,7 @@ public class X86 {
 
     @Override
     public List getFieldOrder() {
-      return Arrays.asList("type", "value", "size", "access", "avx_bcast", "avx_zero_opmask");
+      return Arrays.asList("type", "value", "size", "avx_bcast", "avx_zero_opmask");
     }
   }
 
@@ -84,22 +73,18 @@ public class X86 {
     public byte addr_size;
     public byte modrm;
     public byte sib;
-    public long disp;
+    public int disp;
     public int sib_index;
     public byte sib_scale;
     public int sib_base;
-    public int xop_cc;
     public int sse_cc;
     public int avx_cc;
     public byte avx_sae;
     public int avx_rm;
-    public long eflags;
 
     public byte op_count;
 
     public Operand [] op;
-    
-    public Encoding encoding;
 
     public UnionOpInfo() {
       op = new Operand[8];
@@ -110,7 +95,7 @@ public class X86 {
     @Override
     public List getFieldOrder() {
       return Arrays.asList("prefix", "opcode", "rex", "addr_size",
-          "modrm", "sib", "disp", "sib_index", "sib_scale", "sib_base", "xop_cc", "sse_cc", "avx_cc", "avx_sae", "avx_rm", "eflags", "op_count", "op", "encoding");
+          "modrm", "sib", "disp", "sib_index", "sib_scale", "sib_base", "sse_cc", "avx_cc", "avx_sae", "avx_rm", "op_count", "op");
     }
   }
 
@@ -124,20 +109,16 @@ public class X86 {
     public byte immSize;
     public byte modrm;
     public byte sib;
-    public long disp;
+    public int disp;
     public int sibIndex;
     public byte sibScale;
     public int sibBase;
-    public int xopCC;
     public int sseCC;
     public int avxCC;
     public boolean avxSae;
     public int avxRm;
-    public long eflags;
 
     public Operand[] op;
-    
-    public Encoding encoding;
 
     public OpInfo(UnionOpInfo e) {
       prefix = e.prefix;
@@ -150,16 +131,13 @@ public class X86 {
       sibIndex = e.sib_index;
       sibScale = e.sib_scale;
       sibBase = e.sib_base;
-      xopCC = e.xop_cc;
       sseCC = e.sse_cc;
       avxCC = e.avx_cc;
       avxSae = e.avx_sae > 0;
       avxRm = e.avx_rm;
-      eflags = e.eflags;
       op = new Operand[e.op_count];
       for (int i=0; i<e.op_count; i++)
         op[i] = e.op[i];
-      encoding = e.encoding;
     }
   }
 }

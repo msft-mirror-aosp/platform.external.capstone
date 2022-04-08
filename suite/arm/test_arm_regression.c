@@ -10,8 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <capstone/platform.h>
-#include <capstone/capstone.h>
+#include <platform.h>
+#include <capstone.h>
 
 static csh handle;
 

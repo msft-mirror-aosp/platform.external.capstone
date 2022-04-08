@@ -12,12 +12,12 @@
 //===----------------------------------------------------------------------===//
 
 /* Capstone Disassembly Engine */
-/* By Nguyen Anh Quynh <aquynh@gmail.com>, 2013-2015 */
+/* By Nguyen Anh Quynh <aquynh@gmail.com>, 2013-2014 */
 
 #ifndef CS_POWERPC_PPCPREDICATES_H
 #define CS_POWERPC_PPCPREDICATES_H
 
-#include "capstone/ppc.h"
+#include "../../include/ppc.h"
 
 // NOTE: duplicate of ppc_bc in ppc.h to maitain code compatibility with LLVM
 typedef enum ppc_predicate {

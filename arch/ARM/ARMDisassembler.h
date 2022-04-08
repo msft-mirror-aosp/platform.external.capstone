@@ -1,10 +1,10 @@
 /* Capstone Disassembly Engine */
-/* By Nguyen Anh Quynh <aquynh@gmail.com>, 2013-2015 */
+/* By Nguyen Anh Quynh <aquynh@gmail.com>, 2013-2014 */
 
 #ifndef CS_ARMDISASSEMBLER_H
 #define CS_ARMDISASSEMBLER_H
 
-#include "capstone/capstone.h"
+#include "../../include/capstone.h"
 #include "../../MCRegisterInfo.h"
 
 void ARM_init(MCRegisterInfo *MRI);

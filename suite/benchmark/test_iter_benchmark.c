@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include <capstone/platform.h>
-#include <capstone/capstone.h>
+#include <platform.h>
+#include <capstone.h>
 
 static void test()
 {

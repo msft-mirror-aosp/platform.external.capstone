@@ -1,10 +1,10 @@
 /* Capstone Disassembly Engine */
-/* By Nguyen Anh Quynh <aquynh@gmail.com>, 2013-2015 */
+/* By Nguyen Anh Quynh <aquynh@gmail.com>, 2013-2014 */
 
 #ifndef CS_PPC_MAP_H
 #define CS_PPC_MAP_H
 
-#include "capstone/capstone.h"
+#include "../../include/capstone.h"
 
 // return name of regiser in friendly string
 const char *PPC_reg_name(csh handle, unsigned int reg);

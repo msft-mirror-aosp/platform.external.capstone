@@ -8,11 +8,15 @@
 #include "X86Disassembler.h"
 #include "X86InstPrinter.h"
 #include "X86Mapping.h"
-#include "X86Module.h"
 
-cs_err X86_global_init(cs_struct *ud)
+static cs_err init(cs_struct *ud)
 {
 	MCRegisterInfo *mri;
+
+	// verify if requested mode is valid
+	if (ud->mode & ~(CS_MODE_LITTLE_ENDIAN | CS_MODE_32 | CS_MODE_64 | CS_MODE_16))
+		return CS_ERR_MODE;
+
 	mri = cs_mem_malloc(sizeof(*mri));
 
 	X86_init(mri);
@@ -27,9 +31,6 @@ cs_err X86_global_init(cs_struct *ud)
 	ud->insn_name = X86_insn_name;
 	ud->group_name = X86_group_name;
 	ud->post_printer = NULL;;
-#ifndef CAPSTONE_DIET
-	ud->reg_access = X86_reg_access;
-#endif
 
 	if (ud->mode == CS_MODE_64)
 		ud->regsize_map = regsize_map_64;
@@ -39,7 +40,7 @@ cs_err X86_global_init(cs_struct *ud)
 	return CS_ERR_OK;
 }
 
-cs_err X86_option(cs_struct *handle, cs_opt_type type, size_t value)
+static cs_err option(cs_struct *handle, cs_opt_type type, size_t value)
 {
 	switch(type) {
 		default:
@@ -61,13 +62,8 @@ cs_err X86_option(cs_struct *handle, cs_opt_type type, size_t value)
 
 				case CS_OPT_SYNTAX_DEFAULT:
 				case CS_OPT_SYNTAX_INTEL:
+					handle->printer = X86_Intel_printInst;
 					handle->syntax = CS_OPT_SYNTAX_INTEL;
-					handle->printer = X86_Intel_printInst;
-					break;
-
-				case CS_OPT_SYNTAX_MASM:
-					handle->printer = X86_Intel_printInst;
-					handle->syntax = (int)value;
 					break;
 
 				case CS_OPT_SYNTAX_ATT:
@@ -89,6 +85,20 @@ cs_err X86_option(cs_struct *handle, cs_opt_type type, size_t value)
 	}
 
 	return CS_ERR_OK;
+}
+
+static void destroy(cs_struct *handle)
+{
+}
+
+void X86_enable(void)
+{
+	arch_init[CS_ARCH_X86] = init;
+	arch_option[CS_ARCH_X86] = option;
+	arch_destroy[CS_ARCH_X86] = destroy;
+
+	// support this arch
+	all_arch |= (1 << CS_ARCH_X86);
 }
 
 #endif

@@ -8,7 +8,7 @@
 //===----------------------------------------------------------------------===//
 
 /* Capstone Disassembly Engine */
-/* By Nguyen Anh Quynh <aquynh@gmail.com>, 2013-2015 */
+/* By Nguyen Anh Quynh <aquynh@gmail.com>, 2013-2014 */
 
 #ifndef CS_SYSTEMZMCTARGETDESC_H
 #define CS_SYSTEMZMCTARGETDESC_H
@@ -26,11 +26,6 @@ extern const unsigned SystemZMC_GR128Regs[16];
 extern const unsigned SystemZMC_FP32Regs[16];
 extern const unsigned SystemZMC_FP64Regs[16];
 extern const unsigned SystemZMC_FP128Regs[16];
-extern const unsigned SystemZMC_VR32Regs[32];
-extern const unsigned SystemZMC_VR64Regs[32];
-extern const unsigned SystemZMC_VR128Regs[32];
-extern const unsigned SystemZMC_AR32Regs[16];
-extern const unsigned SystemZMC_CR64Regs[16];
 
 // Return the 0-based number of the first architectural register that
 // contains the given LLVM register.   E.g. R1D -> 1.

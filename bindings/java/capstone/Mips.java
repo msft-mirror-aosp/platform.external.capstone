@@ -61,7 +61,7 @@ public class Mips {
     public Operand [] op;
 
     public UnionOpInfo() {
-      op = new Operand[10];
+      op = new Operand[8];
     }
 
     public void read() {

@@ -19,7 +19,7 @@
 // Capstone.
 
 #include <ntddk.h>
-#include <capstone/capstone.h>
+#include <capstone.h>
 
 // 'conversion' : from function pointer 'type1' to data pointer 'type2'
 #pragma warning(disable : 4054)

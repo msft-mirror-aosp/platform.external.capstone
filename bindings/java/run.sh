@@ -11,8 +11,8 @@ if [ ! -f ${JNA} ]; then
 fi
 
 case "$1" in
-  "") java -classpath ${JNA}:. TestBasic ;;
-  "testbasic") java -classpath ${JNA}:. TestBasic ;;
+  "") java -classpath ${JNA}:. Test ;;
+  "test") java -classpath ${JNA}:. Test ;;
   "arm") java -classpath ${JNA}:. TestArm ;;
   "arm64") java -classpath ${JNA}:. TestArm64 ;;
   "mips") java -classpath ${JNA}:. TestMips ;;
@@ -21,6 +21,5 @@ case "$1" in
   "ppc") java -classpath ${JNA}:. TestPpc ;;
   "sparc") java -classpath ${JNA}:. TestSparc ;;
   "systemz") java -classpath ${JNA}:. TestSystemz ;;
-  "m680x") java -classpath ${JNA}:. TestM680x ;;
-  * ) echo "Usage: ./run.sh [arm|arm64|m680x|mips|ppc|sparc|systemz|x86]"; exit 1;;
+  * ) echo "Usage: ./run.sh [arm|arm64|mips|ppc|sparc|systemz|x86]"; exit 1;;
 esac

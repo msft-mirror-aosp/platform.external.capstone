@@ -36,7 +36,7 @@ public class Ppc {
 
   public static class OpValue extends Union {
     public int reg;
-    public long imm;
+    public int imm;
     public MemType mem;
     public CrxType crx;
   }

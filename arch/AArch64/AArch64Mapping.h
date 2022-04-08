@@ -1,10 +1,10 @@
 /* Capstone Disassembly Engine */
-/* By Nguyen Anh Quynh <aquynh@gmail.com>, 2013-2015 */
+/* By Nguyen Anh Quynh <aquynh@gmail.com>, 2013-2014 */
 
 #ifndef CS_ARM64_MAP_H
 #define CS_ARM64_MAP_H
 
-#include "capstone/capstone.h"
+#include "../../include/capstone.h"
 
 // return name of regiser in friendly string
 const char *AArch64_reg_name(csh handle, unsigned int reg);
@@ -31,11 +31,5 @@ void arm64_op_addVectorElementSizeSpecifier(MCInst * MI, int sp);
 void arm64_op_addFP(MCInst *MI, float fp);
 
 void arm64_op_addImm(MCInst *MI, int64_t imm);
-
-uint8_t *AArch64_get_op_access(cs_struct *h, unsigned int id);
-
-void AArch64_reg_access(const cs_insn *insn,
-		cs_regs regs_read, uint8_t *regs_read_count,
-		cs_regs regs_write, uint8_t *regs_write_count);
 
 #endif

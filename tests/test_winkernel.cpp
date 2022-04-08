@@ -2,9 +2,7 @@
 /* By Satoshi Tanda <tanda.sat@gmail.com>, 2016 */
 
 #include <ntddk.h>
-
-#include <capstone/platform.h>
-#include <capstone/capstone.h>
+#include <capstone.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,9 +30,9 @@ EXTERN_C DRIVER_INITIALIZE DriverEntry;
 // is going to be compiled as C++ source file and not C files because this file
 // is C++.
 
-namespace basic {
-#include "test_basic.c"
-}  // namespace basic
+namespace unnamed {
+#include "test.c"
+}  // namespace unnamed
 
 namespace detail {
 #include "test_detail.c"
@@ -48,10 +46,6 @@ namespace iter {
 #include "test_iter.c"
 }  // namespace iter
 
-namespace customized_mnem_ {
-#include "test_customized_mnem.c"
-}  // namespace customized_mnem_
-
 namespace arm {
 #include "test_arm.c"
 }  // namespace arm
@@ -63,10 +57,6 @@ namespace arm64 {
 namespace mips {
 #include "test_mips.c"
 }  // namespace mips
-
-namespace m68k {
-#include "test_m68k.c"
-}  // namespace m68k
 
 namespace ppc {
 #include "test_ppc.c"
@@ -112,15 +102,13 @@ static void test()
 		return;
 	}
 
-	basic::test();
+	unnamed::test();
 	detail::test();
 	skipdata::test();
 	iter::test();
-	customized_mnem_::test();
 	arm::test();
 	arm64::test();
 	mips::test();
-	m68k::test();
 	ppc::test();
 	sparc::test();
 	systemz::test();

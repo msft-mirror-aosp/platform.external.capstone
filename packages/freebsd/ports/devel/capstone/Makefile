@@ -1,7 +1,7 @@
 # $FreeBSD$
 
 PORTNAME=	capstone
-PORTVERSION=	4.0.0
+PORTVERSION=	3.0.3
 CATEGORIES=	devel
 MASTER_SITES=	http://capstone-engine.org/download/${PORTVERSION}/
 
