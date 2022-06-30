@@ -10,7 +10,7 @@ third_party {
     value: "https://github.com/aquynh/capstone"
   }
   version: "8984920722733400e93f695a0c37a80158341103"
-  # would be NOTICE save for arch/X86/qsort.h
+  license_note: "would be NOTICE save for arch/X86/qsort.h"
   license_type: RECIPROCAL
   last_upgrade_date {
     year: 2020
